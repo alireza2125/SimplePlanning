@@ -1,0 +1,98 @@
+﻿@page "/"
+@attribute [Authorize]
+@inject PlaningViewModel ViewModel
+
+<MudCard Outlined>
+    <MudCardHeader>
+        <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+            <MudButton Size="Size.Small"
+                       Color="Color.Default"
+                       StartIcon="@Icons.Material.Outlined.Add"
+                       OnClick="@(() => ViewModel.AddProject(new() {Name = "new project" }).AsTask())">
+                Add project
+            </MudButton>
+            <MudSpacer/>
+            <MudButton Size="Size.Small"
+                       Color="Color.Default"
+                       StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="@(() => ViewModel.LoadAsync().AsTask())">
+                Refresh
+            </MudButton>
+        </MudStack>
+    </MudCardHeader>
+    <MudCardContent>
+        @foreach (var project in ViewModel.Projects)
+        {
+            <MudCard Outlined @key="project">
+                <MudCardHeader>
+                    <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                        <MudTextField Label="@(nameof(project.Name))" Value="@project.Name" ValueChanged="(string value) => ViewModel.UpdateProject(project, options => options.Name = value).AsTask()"/>
+                        <MudTextField FullWidth Class="flex-grow-1" Label="@(nameof(project.Description))" Value="@project.Description" ValueChanged="(string value) => ViewModel.UpdateProject(project, options => options.Description = value).AsTask()"/>
+                        <MudIconButton Class="p-2" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => ViewModel.RemoveProject(project).AsTask())"/>
+                    </MudStack>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudDropContainer T="TaskModel" Items="project.Tasks"
+                                      ItemsSelector="@((item, dropzone) => item.Status == Enum.Parse<TaskTypeStatus>(dropzone))"
+                                      ItemDropped="@DropItemAsync"
+                                      @key="@project.Tasks">
+                        <MudStack Row Spacing="2" Class="flex-wrap">
+                            @foreach (var taskStatus in ViewModel.TaskTypeStatuses)
+                            {
+                                <MudCard Outlined Style="flex: 1 1 0;" @key="taskStatus">
+                                    <MudCardHeader>
+                                        <MudText>@taskStatus.ToString()</MudText>
+                                    </MudCardHeader>
+                                    <MudCardContent Class="gap-2">
+                                        <MudDropZone T="TaskModel" Identifier="@taskStatus.ToString()" Style="min-height:5rem;width:100%; border:dotted 1px rgba(0,0,0,0.1);">
+                                            <ItemRenderer Context="task">
+                                                    <MudCard Outlined>
+                                                        <MudCardHeader>
+                                                            <MudStack Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Stretch">
+                                                                <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                                                    <MudTextField Class="flex-grow-1" Label="@(nameof(task.Name))" Value="@task.Name" ValueChanged="(string value) => ViewModel.UpdateTask(task, options => options.Name = value).AsTask()"/>
+                                                                    <MudIconButton Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => ViewModel.RemoveTask(task).AsTask())"/>
+                                                                </MudStack>
+                                                                <MudTextField Label="@(nameof(task.Description))" Value="@task.Description" ValueChanged="(string value) => ViewModel.UpdateTask(task, options => options.Description = value).AsTask()"/>
+                                                            </MudStack>
+                                                        </MudCardHeader>
+                                                        <MudCardContent>
+                                                            <MudList>
+                                                                @foreach (var userTask in task.TaskUsers)
+                                                                {
+                                                                    <MudListItem @key="userTask">
+                                                                        <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                                                            <MudText Class="flex-grow-1">
+                                                                                @userTask.User?.Email
+                                                                            </MudText>
+                                                                            <MudIconButton Icon="@Icons.Material.Outlined.Remove"
+                                                                                           OnClick="() => ViewModel.RemoveUserTask(userTask).AsTask()"/>
+                                                                        </MudStack>
+                                                                    </MudListItem>
+                                                                }
+                                                                <MudListItem>
+                                                                    <MudAutocomplete T="UserModel"
+                                                                                     ToStringFunc="@(value => value.Email)"
+                                                                                     SearchFuncWithCancel="(value, cansel) => ViewModel.FindUserAsync(value, cansel).AsTask()"
+                                                                                     ValueChanged="(UserModel value) => ViewModel.AddUserTask(new TaskUserModel{TaskId = task.Id, UserId = value.Id}).AsTask()">
+                                                                    </MudAutocomplete>
+                                                                </MudListItem>
+                                                            </MudList>
+                                                        </MudCardContent>
+                                                    </MudCard>
+                                            </ItemRenderer>
+                                        </MudDropZone>
+                                        <MudButton StartIcon="@Icons.Material.Outlined.Add"
+                                                   OnClick="@(() => ViewModel.AddTask(new(){ProjectId = project.Id, Status = taskStatus, Name = "New task"}).AsTask())">
+                                            Add task
+                                        </MudButton>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
+                        </MudStack>
+                    </MudDropContainer>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudCardContent>
+</MudCard>

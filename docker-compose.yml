@@ -1,0 +1,19 @@
+﻿version: '3.4'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      MSSQL_SA_PASSWORD: 'P@ssW0rd!12345'
+      MSSQL_PID: 'Express'
+      ACCEPT_EULA: 'Y'
+
+  simpleplanning.server:
+    image: ${DOCKER_REGISTRY-}simpleplanningserver
+    build:
+      context: .
+      dockerfile: SimplePlanning.Server/Dockerfile
+    environment:
+      ConnectionStrings__mssql: Server=mssql,1433;Database=Planner;User ID=SA;Password=P@ssW0rd!12345;Encrypt=False;Trusted_Connection=False;MultipleActiveResultSets=true
+    depends_on:
+      - mssql

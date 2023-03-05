@@ -1,0 +1,25 @@
+﻿@page "/identity"
+@inject IdentityViewModel ViewModel
+
+<MudCard>
+    <MudCardContent>
+        <MudForm Model="@ViewModel.Model">
+            <MudTextField T="string"
+                          Label="Email"
+                          InputType="InputType.Email"
+                          Variant="Variant.Outlined"
+                          Value="@ViewModel.Model.Email"
+                          ValueChanged="@(value => ViewModel.Model = ViewModel.Model with { Email = value})"/>
+            <MudTextField T="string"
+                          Label="Password"
+                          InputType="InputType.Password"
+                          Variant="Variant.Outlined"
+                          Value="@ViewModel.Model.Password"
+                          ValueChanged="@(value => ViewModel.Model = ViewModel.Model with { Password = value})"/>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => ViewModel.LoginAsync().AsTask())">Login</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="@(() => ViewModel.SignupAsync().AsTask())">Signup and login</MudButton>
+    </MudCardActions>
+</MudCard>

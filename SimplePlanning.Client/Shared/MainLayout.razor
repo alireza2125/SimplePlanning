@@ -1,0 +1,14 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="false"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudMainContent>
+        <MudContainer Fixed>
+            <MudLink Href="/swagger">Swagger</MudLink>
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
