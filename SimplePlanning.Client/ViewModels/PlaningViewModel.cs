@@ -239,7 +239,17 @@ public class PlaningViewModel
             return;
         }
 
+        var user = await _httpClient.GetFromJsonAsync<UserModel>($"/api/Users/{taskUserModel.UserId}")
+            .ConfigureAwait(false);
+        if (user is null)
+        {
+            _snackbar.Add("Failed to load user data", Severity.Error);
+            return;
+        }
+
         await _dataContext.AddAsync(taskUserModel).ConfigureAwait(false);
+        await _dataContext.AddAsync(user).ConfigureAwait(false);
+
         await _dataContext.SaveChangesAsync().ConfigureAwait(false);
         _snackbar.Add("Add user to task successful", Severity.Success);
     }
